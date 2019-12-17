@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Home - Brand</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bangers">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/simple-line-icons.min.css">
+    <link rel="stylesheet" href="assets/css/Google-Style-Text-Input.css">
+</head>
+
+<body id="page-top">
+    <div id="home" class="masthead" style="background-image: url(&quot;assets/img/background.png&quot;);height: 110%;padding-top: 44px;padding-right: -22px;background-size: cover;">
+        <div class="container my-auto text-center">
+            <h1 class="mb-1" style="background-color: rgb(0,101,145);border-radius: 30px;font-family: Bangers, cursive;color: rgb(255,255,255);">WELCOME TO<br>HEAR 2 LISTEN</h1>
+            <h3 class="mb-5" style="background-color: #a90d58;border-radius: 20px;margin-bottom: 0px;padding-bottom: 8px;padding-top: 8px;color: rgb(255,255,255);"><em style="font-family: Bangers, cursive;">The Best Game For Musicians Ever!</em></h3>
+            <input id="username" type="text" style="background-color: rgb(255,241,165);border-radius: 20px;width: 100%;text-align: center;padding: 17px;font-family: Bangers, cursive;border: none;"
+                placeholder="Type Your Name..."><a id="play" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Click Here To <i class="fa fa-assistive-listening-systems"></i>&nbsp;With Your Mind</a>
+            <div
+                class="overlay"></div>
+                <lottie-player
+            src="https://assets7.lottiefiles.com/temp/lf20_SMGMYY.json"  background="#ffffffd6"  speed="1"  style="width: 300px; height: 300px;"  loop  autoplay >
+        </lottie-player> 
+        </div>
+        
+       </div>
+
+    <div style="text-align: center; display: none;" id="loading">
+            <lottie-player 
+            src="https://assets5.lottiefiles.com/temp/lf20_aiGIon.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop autoplay >
+        </lottie-player>
+        <p>Searching for players</p> 
+
+        <footer class="footer text-center">
+                <div class="container">
+                    <ul class="list-inline mb-5">
+                        <li class="list-inline-item">&nbsp;<a class="text-white social-link rounded-circle" href="#"><i class="icon-social-facebook"></i></a></li>
+                        <li class="list-inline-item">&nbsp;<a class="text-white social-link rounded-circle" href="#"><i class="icon-social-twitter"></i></a></li>
+                        <li class="list-inline-item">&nbsp;<a class="text-white social-link rounded-circle" href="#"><i class="icon-social-github"></i></a></li>
+                    </ul>
+                    <p class="text-muted mb-0 small">Copyright &nbsp;© SHAIDRAI 2020</p>
+        
+                   
+                </div><a class="js-scroll-trigger scroll-to-top rounded" href="#page-top"><i class="fa fa-angle-up"></i></a></footer>
+    </div>
+
+<div id="game" style="display: none; text-align: center">
+<p style="float: left; padding: 3px; background-color: rgb(147, 252, 252); border-radius: 10px;"><span id="userone"></span> : <span id="useronestats"></span></p> <p style="float: right; padding: 3px; background-color: rgb(255, 144, 236); border-radius: 10px;"><span id="usertwo"></span> : <span id="usertwostats"></span></p>
+<div id="countdown" class="align-items-center" style="text-align: center;">
+    
+</div>
+<a id="playagain" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="display: none; border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Play Again <i class="fa fa-repeat"></i></a>
+<section id="full-keyboard" style="bottom: 0px; bottom: 0px; vertical-align: bottom; left:2%; position: absolute;">
+        <section class="keyboard">
+          <div class="note white-key" id="c"></div>
+          <div class="note black-key" id="cS"></div>
+          <div class="note white-key" id="d"></div>
+          <div class="note black-key" id="dS"></div>
+          <div class="note white-key" id="e"></div>
+          <div class="note white-key" id="f"></div>
+          <div class="note black-key" id="f"></div>
+          <div class="note white-key" id="g"></div>
+          <div class="note black-key" id="gS"></div>
+          <div class="note white-key" id="a"></div>
+          <div class="note black-key" id="aS"></div>
+          <div class="note white-key" id="b"></div>
+        </section>
+        <section class="keyboard hide-sm">
+          <div class="white-key" id="c3-key"></div>
+          <div class="black-key" id="c-sharp3-key"></div>
+          <div class="white-key" id="d3-key"></div>
+          <div class="black-key" id="d-sharp3-key"></div>
+          <div class="white-key" id="e3-key"></div>
+          <div class="white-key" id="f3-key"></div>
+          <div class="black-key" id="f-sharp3-key"></div>
+          <div class="white-key" id="g3-key"></div>
+          <div class="black-key" id="g-sharp3-key"></div>
+          <div class="white-key" id="a3-key"></div>
+          <div class="black-key" id="a-sharp3-key"></div>
+          <div class="white-key" id="b3-key"></div>
+        </section>
+    </section>
+</div>
+
+<div id="winner" style="display: none; position: absolute; top: 50%; width: 100%; text-align: center; "> <h1 id="winnername" style="background-color:#ff9ecd; padding: 5px; font-size: 50px; text-align: center; border-radius:30px;"></h1>
+</div>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="assets/js/stylish-portfolio.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</body>
+
+<script>
+
+const socket = io()
+
+        var c = new Audio("./notes/c2.mp3")
+        var cS = new Audio("./notes/cS2.mp3")
+        var d = new Audio("./notes/d2.mp3")
+        var dS = new Audio("./notes/dS2.mp3")
+        var e = new Audio("./notes/e2.mp3")
+        var f = new Audio("./notes/f2.mp3")
+        var fS = new Audio("./notes/fS2.mp3")
+        var g = new Audio("./notes/g2.mp3")
+        var gS = new Audio("./notes/gS2.mp3")
+        var a = new Audio("./notes/a2.mp3")
+        var aS = new Audio("./notes/aS2.mp3")
+        var b = new Audio("./notes/b2.mp3")
+    var SoundList = [{audio: c, noteName: "c"}, {audio: cS, noteName: "cS"}, {audio: d, noteName: "d"}, {audio: dS, noteName: "dS"},{audio: e, noteName: "e"}, {audio: f, noteName: "f"}, {audio: fS, noteName: "fS"}, {audio: g, noteName: "g"}, {audio: gS, noteName: "gS"}, {audio: a, noteName: "a"}, {audio: aS, noteName: "aS"}, {audio: b, noteName: "b"}]
+    var indexlist = ["c", 'cS', 'd', 'dS', 'e', 'f', 'fS', 'g', 'gS', 'a', 'aS', 'b']
+    function play(noteNumber){
+        
+        var a = SoundList[noteNumber].audio
+        a.play()
+    }
+
+$("#play").click(()=>{
+    let username = $("#username").val()
+    socket.emit("join",  username )
+    $("#home").hide()
+    $("#loading").fadeIn()
+
+    
+    // send request and connect to socket
+})
+var savedNote = undefined
+
+socket.on("users", (users)=>{
+    $("#userone").html(users[0])
+    $("#usertwo").html(users[1])
+})
+
+socket.on("start", (note)=>{
+    starting(note)
+    savedNote = note
+})
+
+socket.on("roundwinner", (winner)=>{
+    $("#winnername").html(winner.winner + '<br> WON THE ROUND!')
+    
+    $("#winner").slideDown(100)
+    setTimeout(()=>{
+        $("#winner").slideUp(100)
+    }, 2000)
+    console.log(winner)
+    
+})
+
+
+socket.on("roundstart", (note)=>{
+    $("#full-keyboard").slideUp()
+    roundStart(note)
+    savedNote = note
+})
+
+socket.on("nowinner", ()=>{
+    $("#winnername").html('NO ONE WON THE ROUND <br> YOU LOOSERS!')
+    
+    $("#winner").slideDown(100)
+    setTimeout(()=>{
+        $("#winner").slideUp(100)
+    }, 1500)
+    
+})
+
+let countdown = '<lottie-player\
+    src="https://assets5.lottiefiles.com/temp/lf20_ZJFHXo.json"  background="transparent"  speed="1"  style="width: 250px; height: 250px;" autoplay >\
+</lottie-player>'
+
+
+    
+    
+    function starting(note){
+        $("#loading").hide()
+        $("#game").show()
+        roundStart(note)
+    }
+
+    function roundStart(note){
+        $("#countdown").html('')
+        $("#countdown").html(countdown)
+        console.log("new round")
+        setTimeout(()=>{
+            play(note)
+            $("#full-keyboard").slideDown()
+        
+            setTimeout(()=>{
+            
+            $("#playagain").slideDown()
+
+        }, 1000)
+        }, 3300)
+
+        
+
+    $("#playagain").click(()=>{
+            play(note)
+            $("#playagain").slideUp()
+        })
+        
+    }
+
+    $(".note").click((noteDiv)=>{
+            
+            let noteClicked = noteDiv.toElement.getAttribute("id")
+            
+            play(indexlist.indexOf(noteClicked))
+    
+            
+            
+            if (noteClicked === SoundList[savedNote].noteName){
+                // emit correction 
+                
+                socket.emit('answer', 'correct')
+            }
+            else socket.emit('answer', 'wrong')
+    
+            setTimeout(()=>{
+                $("#full-keyboard").slideUp()
+            }, 100)
+            
+            
+        })
+
+    
+        
+        
+    // error
+   
+    
+
+    
+    </script>
+
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+
+</html>
