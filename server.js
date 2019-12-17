@@ -41,8 +41,8 @@ console.log("connection")
     socket.on("join", (username)=>{
         
 
+        
         let counter = 0;
-            
             if (rooms.length > 0){
                 
             for (var room in rooms){
@@ -65,7 +65,7 @@ console.log("connection")
                     }, 300)
                     
                 }
-                else if(counter === rooms -1){
+                else if(counter === rooms.length -1){
                     newRoom(socket, username)
                 }
                 else{
@@ -94,12 +94,14 @@ console.log("connection")
                     findRoomByName(users[username].room, rooms).then((room)=>{room.wrong = []
                         let user1 = users[room.allusers[0]].points
                         let user2 = users[room.allusers[1]].points
+
+                    io.in(users[username].room).emit('roundwinner', {winner: username, user1, user2 });
+                    io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
                         
                     })
                     
 
-                    io.in(users[username].room).emit('roundwinner', {winner: username, user1, user2 });
-                    io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
+                    
                     
                 }
                 else if (type==="wrong"){
@@ -111,7 +113,9 @@ console.log("connection")
                         if (room.wrong.length === 1){
                             // emit no winner and new round
                             room.wrong = []
-                            io.in(users[username].room).emit('nowinner');
+                            let user1 = users[room.allusers[0]].points
+                            let user2 = users[room.allusers[1]].points
+                            io.in(users[username].room).emit('nowinner', user1, user2);
                             io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
                             
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 

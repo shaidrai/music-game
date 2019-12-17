@@ -19,7 +19,7 @@
             <h1 class="mb-1" style="background-color: rgb(0,101,145);border-radius: 30px;font-family: Bangers, cursive;color: rgb(255,255,255);">WELCOME TO<br>HEAR 2 LISTEN</h1>
             <h3 class="mb-5" style="background-color: #a90d58;border-radius: 20px;margin-bottom: 0px;padding-bottom: 8px;padding-top: 8px;color: rgb(255,255,255);"><em style="font-family: Bangers, cursive;">The Best Game For Musicians Ever!</em></h3>
             <input id="username" type="text" style="background-color: rgb(255,241,165);border-radius: 20px;width: 100%;text-align: center;padding: 17px;font-family: Bangers, cursive;border: none;"
-                placeholder="Type Your Name..."><a id="play" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Click Here To <i class="fa fa-assistive-listening-systems"></i>&nbsp;With Your Mind</a>
+                placeholder="Type Your Name..."><a id="play" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Click Here To Play Online</a>
             <div
                 class="overlay"></div>
                 <lottie-player
@@ -49,11 +49,11 @@
     </div>
 
 <div id="game" style="display: none; text-align: center">
-<p style="float: left; padding: 3px; background-color: rgb(147, 252, 252); border-radius: 10px;"><span id="userone"></span> : <span id="useronestats"></span></p> <p style="float: right; padding: 3px; background-color: rgb(255, 144, 236); border-radius: 10px;"><span id="usertwo"></span> : <span id="usertwostats"></span></p>
+<p style="float: left; padding: 3px; background-color: rgb(147, 252, 252); border-radius: 10px;"><span id="userone"></span> : <span id="useronestats">0</span></p> <p style="float: right; padding: 3px; background-color: rgb(255, 144, 236); border-radius: 10px;"><span id="usertwo"></span> : <span id="usertwostats">0</span></p>
 <div id="countdown" class="align-items-center" style="text-align: center;">
     
 </div>
-<a id="playagain" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="display: none; border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Play Again <i class="fa fa-repeat"></i></a>
+<a id="playagain" class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button" style="display: none; border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Play Again <i class="fa fa-music"></i></a>
 <section id="full-keyboard" style="bottom: 0px; bottom: 0px; vertical-align: bottom; left:2%; position: absolute;">
         <section class="keyboard">
           <div class="note white-key" id="c"></div>
@@ -142,12 +142,14 @@ socket.on("start", (note)=>{
 
 socket.on("roundwinner", (winner)=>{
     $("#winnername").html(winner.winner + '<br> WON THE ROUND!')
-    
+    $("#useronestats").html(winner.user1)
+    $("#usertwostats").html(winner.user2)
     $("#winner").slideDown(100)
+
     setTimeout(()=>{
-        $("#winner").slideUp(100)
+        $("#winner").slideUp(150)
     }, 2000)
-    console.log(winner)
+    
     
 })
 
@@ -158,7 +160,9 @@ socket.on("roundstart", (note)=>{
     savedNote = note
 })
 
-socket.on("nowinner", ()=>{
+socket.on("nowinner", (points)=>{
+    $("#useronestats").html(points.user1)
+    $("#usertwostats").html(points.user2)
     $("#winnername").html('NO ONE WON THE ROUND <br> YOU LOOSERS!')
     
     $("#winner").slideDown(100)
