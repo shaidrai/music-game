@@ -31,15 +31,19 @@ function newRoom(socket, username){
     let roomName = uniqid()
         socket.join(roomName)
         console.log("newroom")
-        rooms.push({name: roomName, length: 1, allusers: [username], wrong: []})
+        rooms.push({name: roomName, length: 1, allusers: [username], wrong: [], lockRoom: false})
         users[username] = {room: roomName, points: 0}
 }
 
 io.on('connection', (socket)=>{
 console.log("connection")
 
+socket.on("kaki", (username)=>{
+    console.log(username, "kaki")
+})
+
     socket.on("join", (username)=>{
-        
+        console.log(username)
 
         
         let counter = 0;
@@ -90,14 +94,20 @@ console.log("connection")
 
                 if (type==="correct"){
                     // emit winner and new round and add points
-                    users[username].points += 10
-                    findRoomByName(users[username].room, rooms).then((room)=>{room.wrong = []
+                    
+                    findRoomByName(users[username].room, rooms).then((room)=>{
+
+                        if(!room.lockRoom){
+                        lockRoom(room)
+
+                        users[username].points += 10
+                        room.wrong = []     
                         let user1 = users[room.allusers[0]].points
                         let user2 = users[room.allusers[1]].points
 
                     io.in(users[username].room).emit('roundwinner', {winner: username, user1, user2 });
                     io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-                        
+                    }
                     })
                     
 
@@ -105,22 +115,26 @@ console.log("connection")
                     
                 }
                 else if (type==="wrong"){
-                    // -10 points to username
-                    if (users[username].points > 0) users[username].points -= 10
                     
                     findRoomByName(users[username].room, rooms).then((room)=>{
+                        if (!room.lockRoom){
+
+                            lockRoom(room)
+                        // -10 points to username
+                        if (users[username].points > 0) users[username].points -= 10
                         //setTimeout(()=>{console.log(room, "full")}, 2000) 
                         if (room.wrong.length === 1){
                             // emit no winner and new round
                             room.wrong = []
                             let user1 = users[room.allusers[0]].points
                             let user2 = users[room.allusers[1]].points
-                            io.in(users[username].room).emit('nowinner', user1, user2);
+                            io.in(users[username].room).emit('nowinner', {user1, user2});
                             io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
                             
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 
                         }
                         else{room.wrong.push(username)}
+                    }
                     })
                 }
             })
@@ -229,12 +243,43 @@ console.log("connection")
             })
         }
 
+// after joining a room
+        socket.on("disconnect",()=>{
+            console.log("disconnet")
+    
+    findRoomByName(users[username].room, rooms).then((room)=>{
+        io.in(room.name).emit("left")
+        rooms.splice( rooms.indexOf(room), 1 );
+        console.log(rooms)
+        })
+    
+    })
+
+    // after joining a room
+    socket.on("disconnect2",()=>{
+        console.log("disconnet")
+
+findRoomByName(users[username].room, rooms).then((room)=>{
+    io.in(room.name).emit("left")
+    rooms.splice( rooms.indexOf(room), 1 );
+    console.log(rooms)
+    })
+
+})
+    
+
             
 
             
+})  
 })
 
-})
+const lockRoom = (room) =>{
+room.lockRoom = true
+                        setTimeout(()=>{
+                            room.lockRoom = false
+                        }, 2000)
+}
 
 app.get('', (req, res) => {
     res.sendFile('index')
