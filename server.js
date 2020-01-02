@@ -27,12 +27,12 @@ const port = process.env.PORT || 5000
 rooms = []
 users = {}
 
-function newRoom(socket, username){
+function newRoom(socket, username, userId){
     let roomName = uniqid()
         socket.join(roomName)
         console.log("newroom")
-        rooms.push({name: roomName, length: 1, allusers: [username], wrong: [], lockRoom: false})
-        users[username] = {room: roomName, points: 0}
+        rooms.push({name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false})
+        users[userId] = {room: roomName, points: 0, username}
 }
 
 io.on('connection', (socket)=>{
@@ -44,25 +44,36 @@ socket.on("kaki", (username)=>{
 
     socket.on("join", (username)=>{
         console.log(username)
-
+        const userId = uniqid()
+        socket.emit('id', userId)
         
         let counter = 0;
             if (rooms.length > 0){
                 
             for (var room in rooms){
                 if (rooms[room].length === 1){
-                    socket.join(rooms[room].name)
+                    
+                    
 
-                    users[username] = {room: rooms[room].name, points: 0}
+                    socket.join(rooms[room].name)
+                    users[userId] = {room: rooms[room].name, points: 0, username}
 
                     rooms[room].length += 1
-                    rooms[room].allusers.push(username)
+                    rooms[room].allusers.push(userId)
+
                     console.log("usedroom")
                     
                     setTimeout(()=>{
                         let note = Math.floor(Math.random() * 11)
-                        io.in(rooms[room].name).emit('users', rooms[room].allusers);
-                        io.in(rooms[room].name).emit('start', note);
+
+                        let RoomUsers = {user1: {id: userId, username}}
+
+                        rooms[room].allusers.forEach((id)=>{
+                            if (id!= userId) RoomUsers["user2"] = {id, username: users[id].username}
+                        })
+                        
+                        
+                        io.in(rooms[room].name).emit('start', {note, RoomUsers});
 
                         
                         
@@ -70,7 +81,7 @@ socket.on("kaki", (username)=>{
                     
                 }
                 else if(counter === rooms.length -1){
-                    newRoom(socket, username)
+                    newRoom(socket, username, userId)
                 }
                 else{
                     counter += 1
@@ -79,7 +90,7 @@ socket.on("kaki", (username)=>{
             
             }
             else{
-                newRoom(socket, username)
+                newRoom(socket, username, userId)
             }
 
             
@@ -95,18 +106,17 @@ socket.on("kaki", (username)=>{
                 if (type==="correct"){
                     // emit winner and new round and add points
                     
-                    findRoomByName(users[username].room, rooms).then((room)=>{
-
+                    findRoomByName(users[userId].room, rooms).then((room)=>{
+                        
                         if(!room.lockRoom){
                         lockRoom(room)
 
-                        users[username].points += 10
+                        users[userId].points += 10
                         room.wrong = []     
-                        let user1 = users[room.allusers[0]].points
-                        let user2 = users[room.allusers[1]].points
+                        let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
+                        let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
 
-                    io.in(users[username].room).emit('roundwinner', {winner: username, user1, user2 });
-                    io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
+                        io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 11)});
                     }
                     })
                     
@@ -116,20 +126,21 @@ socket.on("kaki", (username)=>{
                 }
                 else if (type==="wrong"){
                     
-                    findRoomByName(users[username].room, rooms).then((room)=>{
-                        if (!room.lockRoom){
+                    findRoomByName(users[userId].room, rooms).then((room)=>{
 
-                            lockRoom(room)
+                        if (!room.lockRoom){
                         // -10 points to username
-                        if (users[username].points > 0) users[username].points -= 10
+                        if (users[userId].points > 0) users[userId].points -= 10
                         //setTimeout(()=>{console.log(room, "full")}, 2000) 
                         if (room.wrong.length === 1){
+                            lockRoom(room)
+                            
                             // emit no winner and new round
                             room.wrong = []
-                            let user1 = users[room.allusers[0]].points
-                            let user2 = users[room.allusers[1]].points
-                            io.in(users[username].room).emit('nowinner', {user1, user2});
-                            io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
+                            let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
+                            let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
+                            io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 11)});
+                            
                             
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 
                         }
@@ -141,97 +152,6 @@ socket.on("kaki", (username)=>{
 
 
 
-
-
-
-            // socket.on("correct", ()=>{
-
-            //     console.log("correct")
-            //     findRoomByName(users[username].room, rooms).then((room)=>{
-            //         room.winner.push({username, status: 'correct'})
-            //         checkwin(room.winner).then((status)=>{
-            //             //room.winner = []
-            //             if (status === 'nowinner'){
-            //                 room.winner = []
-            //                 io.in(users[username].room).emit('nowinner')
-            //                 io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            //             }
-            //             else if (status != "notend"){
-            //                 room.winner = []
-            //                 io.in(users[username].room).emit('roundwinner', status);
-            //                 io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            //                 setTimeout(()=>{
-            //                     console.log(rooms)
-            //                 }, 3000)
-            //             }
-            //             else{
-            //                 console.log("continue")
-            //             }
-            //         })
-            //     }) 
-            //     //checkwin(rooms[users.username.room].winner)
-            // })
-
-            // socket.on("wrong", ()=>{
-            //     console.log("wrong")
-            //     findRoomByName(users[username].room, rooms).then((room)=>{
-            //         room.winner.push({username, status: 'wrong'})
-            //         checkwin(room.winner).then((status)=>{
-            //             //room.winner = []
-            //             if (status === 'nowinner'){
-            //                 room.winner = []
-            //                 io.in(users[username].room).emit('nowinner')
-            //                 io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            //             }
-            //             else if (status != "notend"){
-            //                 room.winner = []
-            //                 io.in(users[username].room).emit('roundwinner', status);
-            //                 io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            //                 setTimeout(()=>{
-            //                     console.log(rooms)
-            //                 }, 3000)
-            //             }
-            //             else{
-            //                 console.log("continue")
-            //             }
-            //         })
-            //     })    
-            //     //checkwin(rooms[users.username.room].winner)
-
-            // })
-
-        //     function checkwin(winner){
-        //         console.log(winner)
-        //         return new Promise(function(resolve, reject) {
-        //     if (winner.length === 2){
-                
-        //         if(winner[0].status === "correct"){
-        //             var roundwinner = winner[0].username
-
-        //             //users[roundwinner].stats += 10
-        //     //io.in(users[username].room).emit('roundwinner', roundwinner);
-        //             resolve(roundwinner)
-
-        //     //io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            
-        //         }
-        //         else if(winner[0].status != "correct" && winner[1].status === "correct"){
-        //             var roundwinner = winner[1].username
-        //             resolve(roundwinner)
-
-        //             //users[roundwinner].stats += 10
-        //     //io.in(users[username].room).emit('roundwinner', roundwinner);
-
-        //     //io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-            
-        //         }
-        //         else  resolve("nowinner") //io.in(users[username].room).emit('nowinner')
-                
-        //         //io.in(users[username].room).emit('roundstart', Math.floor(Math.random() * 11));
-        //     }
-        //     else resolve("notend")
-        // })
-        // }
 
         function findRoomByName(roomname, rooms){
             return new Promise(function(resolve, reject) {
@@ -247,25 +167,14 @@ socket.on("kaki", (username)=>{
         socket.on("disconnect",()=>{
             console.log("disconnet")
     
-    findRoomByName(users[username].room, rooms).then((room)=>{
+    findRoomByName(users[userId].room, rooms).then((room)=>{
         io.in(room.name).emit("left")
         rooms.splice( rooms.indexOf(room), 1 );
-        console.log(rooms)
         })
     
     })
 
-    // after joining a room
-    socket.on("disconnect2",()=>{
-        console.log("disconnet")
-
-findRoomByName(users[username].room, rooms).then((room)=>{
-    io.in(room.name).emit("left")
-    rooms.splice( rooms.indexOf(room), 1 );
-    console.log(rooms)
-    })
-
-})
+    
     
 
             
@@ -280,6 +189,8 @@ room.lockRoom = true
                             room.lockRoom = false
                         }, 2000)
 }
+
+
 
 app.get('', (req, res) => {
     res.sendFile('index')
