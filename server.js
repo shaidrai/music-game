@@ -115,7 +115,7 @@ socket.on("kaki", (username)=>{
 
                         // User win
                         if (users[userId].points === 100){
-                            io.in(users[userId].room).emit('gamwwinner', {winner: userId});
+                            io.in(users[userId].room).emit('gamewinner', {winner: userId});
                         }
 
                         // New round 
