@@ -112,11 +112,20 @@ socket.on("kaki", (username)=>{
                         lockRoom(room)
 
                         users[userId].points += 10
-                        room.wrong = []     
+
+                        // User win
+                        if (users[userId].points === 100){
+                            io.in(users[userId].room).emit('gamwwinner', {winner: userId});
+                        }
+
+                        // New round 
+                        else{
+                        room.wrong = []
                         let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
                         let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
 
                         io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 11)});
+                        }
                     }
                     })
                     
@@ -134,7 +143,6 @@ socket.on("kaki", (username)=>{
                         //setTimeout(()=>{console.log(room, "full")}, 2000) 
                         if (room.wrong.length === 1){
                             lockRoom(room)
-                            
                             // emit no winner and new round
                             room.wrong = []
                             let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
