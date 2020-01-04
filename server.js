@@ -111,9 +111,8 @@ console.log("connection")
                         users[userId].points += 10
 
                         // User win
-                        if (users[userId].points === 20){
+                        if (users[userId].points === 100){
                             io.in(users[userId].room).emit('gamewinner', {winner: userId});
-
                         }
 
                         // New round 
