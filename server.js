@@ -121,7 +121,7 @@ console.log("connection")
                         let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
                         let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
 
-                        io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 12)});
+                        io.in(users[userId].room).emit('roundwinner', {winner: userId, user1, user2, note: Math.floor(Math.random() * 12)});
                         }
                     }
                     })
@@ -144,7 +144,7 @@ console.log("connection")
                             room.wrong = []
                             let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
                             let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
-                            io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 12)});
+                            io.in(users[userId].room).emit('roundwinner', {winner:undefined, user1, user2, note: Math.floor(Math.random() * 12)});
                             
                             
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 
