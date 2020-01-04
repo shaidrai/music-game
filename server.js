@@ -31,16 +31,13 @@ function newRoom(socket, username, userId){
     let roomName = uniqid()
         socket.join(roomName)
         console.log("newroom")
-        rooms.push({name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false})
+        rooms.push({name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false, rematch: false})
         users[userId] = {room: roomName, points: 0, username}
 }
 
 io.on('connection', (socket)=>{
 console.log("connection")
 
-socket.on("kaki", (username)=>{
-    console.log(username, "kaki")
-})
 
     socket.on("join", (username)=>{
         console.log(username)
@@ -64,7 +61,7 @@ socket.on("kaki", (username)=>{
                     console.log("usedroom")
                     
                     setTimeout(()=>{
-                        let note = Math.floor(Math.random() * 11)
+                        let note = Math.floor(Math.random() * 12)
 
                         let RoomUsers = {user1: {id: userId, username}}
 
@@ -114,8 +111,9 @@ socket.on("kaki", (username)=>{
                         users[userId].points += 10
 
                         // User win
-                        if (users[userId].points === 100){
+                        if (users[userId].points === 20){
                             io.in(users[userId].room).emit('gamewinner', {winner: userId});
+
                         }
 
                         // New round 
@@ -124,7 +122,7 @@ socket.on("kaki", (username)=>{
                         let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
                         let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
 
-                        io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 11)});
+                        io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 12)});
                         }
                     }
                     })
@@ -147,7 +145,7 @@ socket.on("kaki", (username)=>{
                             room.wrong = []
                             let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
                             let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
-                            io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 11)});
+                            io.in(users[userId].room).emit('roundwinner', {winner:false, user1, user2, note: Math.floor(Math.random() * 12)});
                             
                             
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 
@@ -170,6 +168,24 @@ socket.on("kaki", (username)=>{
                 });
             })
         }
+
+        socket.on("rematch",()=>{
+            console.log("rematch")
+    
+    findRoomByName(users[userId].room, rooms).then((room)=>{
+        if (room.rematch){
+            cleanRoomPoints(room)
+            io.in(rooms[room].name).emit('start', {note: Math.floor(Math.random() * 12)});
+        }
+        else{
+        io.in(room.name).emit("rematch")
+        room.rematch = true
+        }
+
+        })
+    
+    })
+
 
 // after joining a room
         socket.on("disconnect",()=>{
@@ -196,6 +212,13 @@ room.lockRoom = true
                         setTimeout(()=>{
                             room.lockRoom = false
                         }, 2000)
+}
+
+const cleanRoomPoints = (room) =>{
+    room.allusers.forEach((id)=>{
+        users[id].points = 0
+        console.log(room)
+    })
 }
 
 
