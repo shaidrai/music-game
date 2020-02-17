@@ -1,6 +1,6 @@
 const path = require('path')   
 const express = require('express')
-const socketio = require('socket.io', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] })
+const socketio = require('socket.io')
 const http = require('http')
 const cors = require('cors')
 const bodyParser = require('body-parser');
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 
 const server =  http.createServer(app)
-const io = socketio(server, { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] }) 
+const io = socketio(server) 
 
 const port = process.env.PORT || 5000
 
