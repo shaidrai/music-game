@@ -1,6 +1,6 @@
 const path = require('path')   
 const express = require('express')
-const socketio = require('socket.io', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] }))
+const socketio = require('socket.io', { rememberTransport: false, transports: ['WebSocket', 'Flash Socket', 'AJAX long-polling'] })
 const http = require('http')
 const cors = require('cors')
 const bodyParser = require('body-parser');
