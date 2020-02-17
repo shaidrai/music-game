@@ -60,21 +60,19 @@ console.log("connection")
 
                     console.log("usedroom")
                     
-                    setTimeout(()=>{
-                        let note = Math.floor(Math.random() * 12)
+                   
+                    let note = Math.floor(Math.random() * 12)
 
-                        let RoomUsers = {user1: {id: userId, username}}
+                    let RoomUsers = {user1: {id: userId, username}}
 
-                        rooms[room].allusers.forEach((id)=>{
-                            if (id!= userId) RoomUsers["user2"] = {id, username: users[id].username}
-                        })
-                        
-                        
-                        io.in(rooms[room].name).emit('start', {note, RoomUsers});
+                    rooms[room].allusers.forEach((id)=>{
+                        if (id!= userId) RoomUsers["user2"] = {id, username: users[id].username}
+                    })
 
-                        
-                        
-                    }, 300)
+
+                    io.in(rooms[room].name).emit('start', {note, RoomUsers});
+
+                      
                     
                 }
                 else if(counter === rooms.length -1){
