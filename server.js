@@ -1,4 +1,4 @@
-const path = require('path')   
+const path = require('path')
 const express = require('express')
 const socketio = require('socket.io')
 const http = require('http')
@@ -19,200 +19,201 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 
 
-const server =  http.createServer(app)
-const io = socketio(server) 
+const server = http.createServer(app)
+const io = socketio(server)
 
 const port = process.env.PORT || 5000
 
 rooms = []
 users = {}
 
-function newRoom(socket, username, userId){
+function newRoom(socket, username, userId, profilePic) {
     let roomName = uniqid()
-        socket.join(roomName)
-        console.log("newroom")
-        rooms.push({name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false, rematch: false})
-        users[userId] = {room: roomName, points: 0, username}
+    socket.join(roomName)
+    console.log("newroom")
+    rooms.push({ name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false, rematch: false })
+    users[userId] = { room: roomName, points: 0, username, profilePic }
 }
 
-io.on('connection', (socket)=>{
-console.log("connection")
+io.on('connection', (socket) => {
+    console.log("connection")
 
 
-    socket.on("join", (username)=>{
-        console.log(username)
+    socket.on("join", (user) => {
+        console.log(user.name)
+        console.log(user.profilePictureIndex)
         const userId = uniqid()
         socket.emit('id', userId)
-        
+
         let counter = 0;
-            if (rooms.length > 0){
-                
-            for (var room in rooms){
-                if (rooms[room].length === 1){
-                    
-                    
+        if (rooms.length > 0) {
+
+            for (var room in rooms) {
+                if (rooms[room].length === 1) {
+
+
 
                     socket.join(rooms[room].name)
-                    users[userId] = {room: rooms[room].name, points: 0, username}
+                    users[userId] = { room: rooms[room].name, points: 0, username: user.name, profilePic: user.profilePictureIndex }
 
                     rooms[room].length += 1
                     rooms[room].allusers.push(userId)
 
                     console.log("usedroom")
-                    
-                   
+
+
                     let note = Math.floor(Math.random() * 12)
 
-                    let RoomUsers = {user1: {id: userId, username}}
+                    let RoomUsers = { user1: { id: userId, username: user.name, profilePic: user.profilePictureIndex } }
 
-                    rooms[room].allusers.forEach((id)=>{
-                        if (id!= userId) RoomUsers["user2"] = {id, username: users[id].username}
+                    rooms[room].allusers.forEach((id) => {
+                        if (id != userId) RoomUsers["user2"] = { id, username: users[id].username, profilePic: users[id].profilePic, kaki: 2 }
                     })
 
 
-                    io.in(rooms[room].name).emit('start', {note, RoomUsers});
+                    io.in(rooms[room].name).emit('start', { note, RoomUsers });
 
-                      
-                    
+
+
                 }
-                else if(counter === rooms.length -1){
-                    newRoom(socket, username, userId)
+                else if (counter === rooms.length - 1) {
+                    newRoom(socket, user.name, userId, user.profilePictureIndex)
                 }
-                else{
+                else {
                     counter += 1
                 }
             }
-            
-            }
-            else{
-                newRoom(socket, username, userId)
-            }
 
-            
-            
+        }
+        else {
+            newRoom(socket, user.name, userId, user.profilePictureIndex)
+        }
 
-            socket.on("answer", (type)=>{
-                console.log("emit")
-                
-                
-                // let user1 = users[room_name.allusers[0]].points
-                // let user2 = users[room_name.allusers[1]].points
 
-                if (type==="correct"){
-                    // emit winner and new round and add points
-                    
-                    findRoomByName(users[userId].room, rooms).then((room)=>{
-                        
-                        if(!room.lockRoom){
+
+
+        socket.on("answer", (type) => {
+            console.log("emit")
+
+
+            // let user1 = users[room_name.allusers[0]].points
+            // let user2 = users[room_name.allusers[1]].points
+
+            if (type === "correct") {
+                // emit winner and new round and add points
+
+                findRoomByName(users[userId].room, rooms).then((room) => {
+
+                    if (!room.lockRoom) {
                         lockRoom(room)
 
                         users[userId].points += 10
 
                         // User win
-                        if (users[userId].points === 100){
-                            io.in(users[userId].room).emit('gamewinner', {winner: userId});
+                        if (users[userId].points === 100) {
+                            io.in(users[userId].room).emit('gamewinner', { winner: userId });
                         }
 
                         // New round 
-                        else{
-                        room.wrong = []
-                        let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
-                        let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
+                        else {
+                            room.wrong = []
+                            let user1 = { id: room.allusers[0], points: users[room.allusers[0]].points }
+                            let user2 = { id: room.allusers[1], points: users[room.allusers[1]].points }
 
-                        io.in(users[userId].room).emit('roundwinner', {winner: userId, user1, user2, note: Math.floor(Math.random() * 12)});
+                            io.in(users[userId].room).emit('roundwinner', { winner: userId, user1, user2, note: Math.floor(Math.random() * 12) });
                         }
                     }
-                    })
-                    
+                })
 
-                    
-                    
-                }
-                else if (type==="wrong"){
-                    
-                    findRoomByName(users[userId].room, rooms).then((room)=>{
 
-                        if (!room.lockRoom){
+
+
+            }
+            else if (type === "wrong") {
+
+                findRoomByName(users[userId].room, rooms).then((room) => {
+
+                    if (!room.lockRoom) {
                         // -10 points to username
                         if (users[userId].points > 0) users[userId].points -= 10
                         //setTimeout(()=>{console.log(room, "full")}, 2000) 
-                        if (room.wrong.length === 1){
+                        if (room.wrong.length === 1) {
                             lockRoom(room)
                             // emit no winner and new round
                             room.wrong = []
-                            let user1 = {id: room.allusers[0], points: users[room.allusers[0]].points }
-                            let user2 = {id: room.allusers[1], points: users[room.allusers[1]].points }
-                            io.in(users[userId].room).emit('roundwinner', {winner:undefined, user1, user2, note: Math.floor(Math.random() * 12)});
-                            
-                            
+                            let user1 = { id: room.allusers[0], points: users[room.allusers[0]].points }
+                            let user2 = { id: room.allusers[1], points: users[room.allusers[1]].points }
+                            io.in(users[userId].room).emit('roundwinner', { winner: undefined, user1, user2, note: Math.floor(Math.random() * 12) });
+
+
                             //setTimeout(()=>{console.log(room, "emty")}, 2000) 
                         }
-                        else{room.wrong.push(username)}
+                        else { room.wrong.push(username) }
                     }
-                    })
-                }
-            })
+                })
+            }
+        })
 
 
 
 
-        function findRoomByName(roomname, rooms){
-            return new Promise(function(resolve, reject) {
+        function findRoomByName(roomname, rooms) {
+            return new Promise(function (resolve, reject) {
                 rooms.forEach(room => {
-                    if (room.name === roomname){
+                    if (room.name === roomname) {
                         resolve(room)
                     }
                 });
             })
         }
 
-        socket.on("rematch",()=>{
+        socket.on("rematch", () => {
             console.log("rematch")
-    
-    findRoomByName(users[userId].room, rooms).then((room)=>{
-        if (room.rematch){
-            cleanRoomPoints(room)
-            io.in(rooms[room].name).emit('start', {note: Math.floor(Math.random() * 12)});
-        }
-        else{
-        io.in(room.name).emit("rematch")
-        room.rematch = true
-        }
+
+            findRoomByName(users[userId].room, rooms).then((room) => {
+                if (room.rematch) {
+                    cleanRoomPoints(room)
+                    io.in(rooms[room].name).emit('start', { note: Math.floor(Math.random() * 12) });
+                }
+                else {
+                    io.in(room.name).emit("rematch")
+                    room.rematch = true
+                }
+
+            })
 
         })
-    
-    })
 
 
-// after joining a room
-        socket.on("disconnect",()=>{
+        // after joining a room
+        socket.on("disconnect", () => {
             console.log("disconnet")
-    
-    findRoomByName(users[userId].room, rooms).then((room)=>{
-        io.in(room.name).emit("left")
-        rooms.splice( rooms.indexOf(room), 1 );
+
+            findRoomByName(users[userId].room, rooms).then((room) => {
+                io.in(room.name).emit("left")
+                rooms.splice(rooms.indexOf(room), 1);
+            })
+
         })
-    
+
+
+
+
+
+
+
     })
-
-    
-    
-
-            
-
-            
-})  
 })
 
-const lockRoom = (room) =>{
-room.lockRoom = true
-                        setTimeout(()=>{
-                            room.lockRoom = false
-                        }, 2000)
+const lockRoom = (room) => {
+    room.lockRoom = true
+    setTimeout(() => {
+        room.lockRoom = false
+    }, 2000)
 }
 
-const cleanRoomPoints = (room) =>{
-    room.allusers.forEach((id)=>{
+const cleanRoomPoints = (room) => {
+    room.allusers.forEach((id) => {
         users[id].points = 0
         console.log(room)
     })
@@ -224,6 +225,6 @@ app.get('', (req, res) => {
     res.sendFile('index')
 })
 
-server.listen(port, ()=>{
+server.listen(port, () => {
     console.log("Server is up")
 })
