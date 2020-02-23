@@ -27,8 +27,9 @@ class Room {
         this.gameLevel = gameLevel
         this.answers = 0
         this.gameOver = false
-        this.pointsLimit = 100
-        this.disconnectedUsers = 0
+        this.pointsLimit = 10
+        this.disconnectedUsers = 0,
+            this.gameStarted = false
     }
 
     closeRoom() {
@@ -47,13 +48,11 @@ class Room {
 
 }
 
-
-
 class game {
 
 
     startNewGame(room) {
-        console.log(Date())
+        room.gameStarted = true
         io.in(room.name).emit('start', { note: this.createNote(room.gameLevel), RoomUsers: { user1: room.users[0], user2: room.users[1] } });
     }
 
@@ -67,7 +66,7 @@ class game {
 
                 if (user.points === room.pointsLimit) {
                     // Gameover
-                    this.endGame(room, winner)
+                    this.endGame(room, user.id)
                 }
 
                 else {
@@ -171,8 +170,10 @@ io.on('connection', (socket) => {
         })
 
         socket.on("disconnect", () => {
-            room.disconnectedUsers += 1
+            // if user leave on loading, the room should be deleted 
+            if (!room.gameStarted) availbleRoom = undefined
 
+            room.disconnectedUsers += 1
             if (room.disconnectedUsers === room.players - 1) {
                 io.in(room.name).emit("left")
             }
