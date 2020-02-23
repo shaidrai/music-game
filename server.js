@@ -17,207 +17,204 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
 
+class Room {
+    constructor(sockets = [], players = 2, gameLevel = 1) {
+        this.users = []
+        this.sockets = sockets;
+        this.lockRoom = false;
+        this.name = uniqid()
+        this.players = players
+        this.gameLevel = gameLevel
+        this.answers = 0
+        this.gameOver = false
+        this.pointsLimit = 100
+        this.disconnectedUsers = 0
+    }
 
+    closeRoom() {
+        this.sockets.forEach((socket) => {
+            socket.disconnect()
+        })
+    }
+
+    lockThisRoom() {
+        this.lockRoom = true
+        setTimeout(() => {
+            this.lockRoom = false
+        }, 2500)
+    }
+
+
+}
+
+
+
+class game {
+
+
+    startNewGame(room) {
+        console.log(Date())
+        io.in(room.name).emit('start', { note: this.createNote(room.gameLevel), RoomUsers: { user1: room.users[0], user2: room.users[1] } });
+    }
+
+    answer(room, answerType, user) {
+
+        if (!room.lockRoom) {
+            if (answerType === 'correct') {
+                // end of round
+                room.lockThisRoom()
+                user.points += 10 // adding 10 points for correct answer
+
+                if (user.points === room.pointsLimit) {
+                    // Gameover
+                    this.endGame(room, winner)
+                }
+
+                else {
+                    // winner id for the client
+                    room.answers = 0
+                    this.newRound(room, user.id)
+                }
+            }
+            else {
+                room.answers += 1
+                if (user.points > 0) user.points -= 10
+
+                if (room.answers === room.players) {
+                    // end of round
+                    //room.lockThisRoom()
+                    room.answers = 0
+                    this.newRound(room)
+                }
+            }
+        }
+    }
+
+    newRound(room, winner) {
+        let responseObjet = {};
+        responseObjet.note = this.createNote(room.gameLevel)
+        responseObjet.winner = winner
+        responseObjet.user1 = room.users[0] // adding users data to the response for the client
+        responseObjet.user2 = room.users[1]  // changae that to array later!!
+        //responseObjet.users = room.users
+        io.in(room.name).emit('roundwinner', responseObjet)
+
+    }
+
+    createNote(gameLevel) {
+        let note;
+        if (gameLevel === 0) {
+            note = Math.floor(Math.random() * 12)
+        }
+        if (gameLevel === 1) {
+            note = Math.floor(Math.random() * 12)
+        }
+        if (gameLevel === 2) {
+            note = Math.floor(Math.random() * 12)
+        }
+        return note
+
+
+    }
+
+    endGame(room, winner) {
+
+        if (!room.gameOver) {
+            room.gameOver = true
+            io.in(room.name).emit('gamewinner', { winner });
+            room.closeRoom()
+        }
+    }
+}
 
 const server = http.createServer(app)
 const io = socketio(server)
 
 const port = process.env.PORT || 5000
 
-rooms = []
-users = {}
 
-function newRoom(socket, username, userId, profilePic) {
-    let roomName = uniqid()
-    socket.join(roomName)
-    console.log("newroom")
-    rooms.push({ name: roomName, length: 1, allusers: [userId], wrong: [], lockRoom: false, rematch: false })
-    users[userId] = { room: roomName, points: 0, username, profilePic }
-}
-
+let availbleRoom = undefined
+let Game = new game()
 io.on('connection', (socket) => {
-    console.log("connection")
+    socket.on('join', (user) => {
 
+        user.id = uniqid()
+        user.points = 0
 
-    socket.on("join", (user) => {
-        console.log(user.name)
-        console.log(user.profilePictureIndex)
-        const userId = uniqid()
-        socket.emit('id', userId)
+        socket.emit('id', user.id)
+        let room;
 
-        let counter = 0;
-        if (rooms.length > 0) {
-
-            for (var room in rooms) {
-                if (rooms[room].length === 1) {
-
-
-
-                    socket.join(rooms[room].name)
-                    users[userId] = { room: rooms[room].name, points: 0, username: user.name, profilePic: user.profilePictureIndex }
-
-                    rooms[room].length += 1
-                    rooms[room].allusers.push(userId)
-
-                    console.log("usedroom")
-
-
-                    let note = Math.floor(Math.random() * 12)
-
-                    let RoomUsers = { user1: { id: userId, username: user.name, profilePic: user.profilePictureIndex } }
-
-                    rooms[room].allusers.forEach((id) => {
-                        if (id != userId) RoomUsers["user2"] = { id, username: users[id].username, profilePic: users[id].profilePic, kaki: 2 }
-                    })
-
-
-                    io.in(rooms[room].name).emit('start', { note, RoomUsers });
-
-
-
-                }
-                else if (counter === rooms.length - 1) {
-                    newRoom(socket, user.name, userId, user.profilePictureIndex)
-                }
-                else {
-                    counter += 1
-                }
-            }
-
+        if (availbleRoom) {
+            console.log("existing room")
+            // odd player, joining existing room
+            room = availbleRoom
+            availbleRoom = undefined
+            room.users.push(user)
+            room.sockets.push(socket)
+            socket.join(room.name)
+            Game.startNewGame(room, io)
         }
         else {
-            newRoom(socket, user.name, userId, user.profilePictureIndex)
+            console.log("new room")
+            // even player, creating new room
+            room = new Room()
+            room.users.push(user)
+            room.sockets.push(socket)
+            availbleRoom = room
+            socket.join(room.name)
         }
-
-
 
 
         socket.on("answer", (type) => {
-            console.log("emit")
-
-
-            // let user1 = users[room_name.allusers[0]].points
-            // let user2 = users[room_name.allusers[1]].points
-
-            if (type === "correct") {
-                // emit winner and new round and add points
-
-                findRoomByName(users[userId].room, rooms).then((room) => {
-
-                    if (!room.lockRoom) {
-                        lockRoom(room)
-
-                        users[userId].points += 10
-
-                        // User win
-                        if (users[userId].points === 100) {
-                            io.in(users[userId].room).emit('gamewinner', { winner: userId });
-                        }
-
-                        // New round 
-                        else {
-                            room.wrong = []
-                            let user1 = { id: room.allusers[0], points: users[room.allusers[0]].points }
-                            let user2 = { id: room.allusers[1], points: users[room.allusers[1]].points }
-
-                            io.in(users[userId].room).emit('roundwinner', { winner: userId, user1, user2, note: Math.floor(Math.random() * 12) });
-                        }
-                    }
-                })
-
-
-
-
-            }
-            else if (type === "wrong") {
-
-                findRoomByName(users[userId].room, rooms).then((room) => {
-
-                    if (!room.lockRoom) {
-                        // -10 points to username
-                        if (users[userId].points > 0) users[userId].points -= 10
-                        //setTimeout(()=>{console.log(room, "full")}, 2000) 
-                        if (room.wrong.length === 1) {
-                            lockRoom(room)
-                            // emit no winner and new round
-                            room.wrong = []
-                            let user1 = { id: room.allusers[0], points: users[room.allusers[0]].points }
-                            let user2 = { id: room.allusers[1], points: users[room.allusers[1]].points }
-                            io.in(users[userId].room).emit('roundwinner', { winner: undefined, user1, user2, note: Math.floor(Math.random() * 12) });
-
-
-                            //setTimeout(()=>{console.log(room, "emty")}, 2000) 
-                        }
-                        else { room.wrong.push(username) }
-                    }
-                })
-            }
-        })
-
-
-
-
-        function findRoomByName(roomname, rooms) {
-            return new Promise(function (resolve, reject) {
-                rooms.forEach(room => {
-                    if (room.name === roomname) {
-                        resolve(room)
-                    }
-                });
-            })
-        }
-
-        socket.on("rematch", () => {
-            console.log("rematch")
-
-            findRoomByName(users[userId].room, rooms).then((room) => {
-                if (room.rematch) {
-                    cleanRoomPoints(room)
-                    io.in(rooms[room].name).emit('start', { note: Math.floor(Math.random() * 12) });
-                }
-                else {
-                    io.in(room.name).emit("rematch")
-                    room.rematch = true
-                }
-
-            })
+            Game.answer(room, type, user)
 
         })
 
-
-        // after joining a room
         socket.on("disconnect", () => {
-            console.log("disconnet")
+            room.disconnectedUsers += 1
 
-            findRoomByName(users[userId].room, rooms).then((room) => {
+            if (room.disconnectedUsers === room.players - 1) {
                 io.in(room.name).emit("left")
-                rooms.splice(rooms.indexOf(room), 1);
-            })
+            }
 
         })
-
-
-
-
-
-
 
     })
 })
 
-const lockRoom = (room) => {
-    room.lockRoom = true
-    setTimeout(() => {
-        room.lockRoom = false
-    }, 2000)
-}
 
-const cleanRoomPoints = (room) => {
-    room.allusers.forEach((id) => {
-        users[id].points = 0
-        console.log(room)
-    })
-}
+
+// socket.on("rematch", () => {
+//     console.log("rematch")
+
+//     findRoomByName(users[userId].room, rooms).then((room) => {
+//         if (room.rematch) {
+//             cleanRoomPoints(room)
+//             io.in(rooms[room].name).emit('start', { note: Math.floor(Math.random() * 12) });
+//         }
+//         else {
+//             io.in(room.name).emit("rematch")
+//             room.rematch = true
+//         }
+
+//     })
+
+// })
+
+
+// after joining a room
+// socket.on("disconnect", () => {
+//     console.log("disconnet")
+
+//     findRoomByName(users[userId].room, rooms).then((room) => {
+
+
+//         io.in(room.name).emit("left")
+//         rooms.splice(rooms.indexOf(room), 1);
+//     })
+
+// })
+
 
 
 
@@ -228,3 +225,7 @@ app.get('', (req, res) => {
 server.listen(port, () => {
     console.log("Server is up")
 })
+
+
+
+
