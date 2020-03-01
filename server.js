@@ -18,16 +18,16 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 
 class Room {
-    constructor(sockets = [], players = 2, gameLevel = 1) {
+    constructor(gameLevel = 0) {
         this.users = []
-        this.sockets = sockets;
+        this.sockets = [];
         this.lockRoom = false;
         this.name = uniqid()
-        this.players = players
+        this.players = 2
         this.gameLevel = gameLevel
         this.answers = 0
         this.gameOver = false
-        this.pointsLimit = 10
+        this.pointsLimit = 100
         this.disconnectedUsers = 0,
             this.gameStarted = false
     }
@@ -85,6 +85,9 @@ class game {
                     room.answers = 0
                     this.newRound(room)
                 }
+                else {
+
+                }
             }
         }
     }
@@ -103,7 +106,8 @@ class game {
     createNote(gameLevel) {
         let note;
         if (gameLevel === 0) {
-            note = Math.floor(Math.random() * 12)
+            let whiteNotes = [0, 2, 4, 5, 7, 9, 11]
+            note = whiteNotes[Math.floor(Math.random() * whiteNotes.length)]
         }
         if (gameLevel === 1) {
             note = Math.floor(Math.random() * 12)
@@ -132,22 +136,25 @@ const io = socketio(server)
 const port = process.env.PORT || 5000
 
 
-let availbleRoom = undefined
+let availbleRoom = [undefined, undefined, undefined] // Level one, two and three.
+
 let Game = new game()
 io.on('connection', (socket) => {
     socket.on('join', (user) => {
 
         user.id = uniqid()
         user.points = 0
-
         socket.emit('id', user.id)
         let room;
 
-        if (availbleRoom) {
+
+        console.log(user.difficulty)
+        console.log(availbleRoom)
+        if (availbleRoom[user.difficulty]) {
             console.log("existing room")
             // odd player, joining existing room
-            room = availbleRoom
-            availbleRoom = undefined
+            room = availbleRoom[user.difficulty]
+            availbleRoom[user.difficulty] = undefined
             room.users.push(user)
             room.sockets.push(socket)
             socket.join(room.name)
@@ -156,11 +163,12 @@ io.on('connection', (socket) => {
         else {
             console.log("new room")
             // even player, creating new room
-            room = new Room()
+            room = new Room(user.difficulty)
             room.users.push(user)
             room.sockets.push(socket)
-            availbleRoom = room
+            availbleRoom[user.difficulty] = room
             socket.join(room.name)
+
         }
 
 
@@ -171,7 +179,7 @@ io.on('connection', (socket) => {
 
         socket.on("disconnect", () => {
             // if user leave on loading, the room should be deleted 
-            if (!room.gameStarted) availbleRoom = undefined
+            if (!room.gameStarted) availbleRoom[user.difficulty] = undefined
 
             room.disconnectedUsers += 1
             if (room.disconnectedUsers === room.players - 1) {
