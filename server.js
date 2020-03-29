@@ -45,6 +45,12 @@ class Room {
         }, 2500)
     }
 
+    joinRoom(socket, user) {
+        // Join the room
+        this.users.push(user)
+        this.sockets.push(socket)
+        socket.join(this.name)
+    }
 
 }
 
@@ -137,8 +143,9 @@ const port = process.env.PORT || 5000
 
 
 let availbleRoom = [undefined, undefined, undefined] // Level one, two and three.
-
+let PrivateRooms = []
 let Game = new game()
+
 io.on('connection', (socket) => {
     socket.on('join', (user) => {
 
@@ -148,26 +155,21 @@ io.on('connection', (socket) => {
         let room;
 
 
-        console.log(user.difficulty)
-        console.log(availbleRoom)
+
         if (availbleRoom[user.difficulty]) {
             console.log("existing room")
             // odd player, joining existing room
             room = availbleRoom[user.difficulty]
             availbleRoom[user.difficulty] = undefined
-            room.users.push(user)
-            room.sockets.push(socket)
-            socket.join(room.name)
+            room.joinRoom(socket, user)
             Game.startNewGame(room, io)
         }
         else {
             console.log("new room")
             // even player, creating new room
             room = new Room(user.difficulty)
-            room.users.push(user)
-            room.sockets.push(socket)
             availbleRoom[user.difficulty] = room
-            socket.join(room.name)
+            room.joinRoom(socket, user)
 
         }
 
@@ -189,6 +191,96 @@ io.on('connection', (socket) => {
         })
 
     })
+
+
+
+
+    // ***** Private Room!
+
+    socket.on('createPrivateRoom', (data) => {
+        let user = data.user
+        console.log("new private room")
+
+        // Sending unique ID to the client
+        user.id = uniqid()
+        socket.emit('id', user.id)
+        user.points = 0
+
+        let room = new Room(user.difficulty)
+        let roomIndex = PrivateRooms.push(room) - 1
+
+        room.joinRoom(socket, user)
+
+
+        socket.emit("roomName", room.name)
+
+        socket.on("disconnect", () => {
+            console.log("dissconnect")
+
+            // if user leave on loading, the room should be deleted 
+            if (!room.gameStarted) PrivateRooms.pop(roomIndex)
+
+            room.disconnectedUsers += 1
+            if (room.disconnectedUsers === room.players - 1) {
+                io.in(room.name).emit("left")
+            }
+
+        })
+
+
+        socket.on("answer", (type) => {
+            Game.answer(room, type, user)
+
+        })
+
+        socket.on('startPrivateGame', () => {
+
+            if (room.users.length > 1) {
+                io.in(room.name).emit("goToGame")
+
+                console.log("starting")
+                Game.startNewGame(room, io)
+
+            }
+            else console.log("Not enought players")
+        })
+
+
+    })
+
+    socket.on('joinPrivateRoom', (data) => {
+        let user = data.user
+        let roomName = data.roomName
+        console.log(roomName)
+
+        // Sending unique ID to the client
+        user.id = uniqid()
+        socket.emit('id', user.id)
+
+        user.points = 0
+
+        let room = PrivateRooms.find((room) => {
+            if (room.name == roomName) {
+                console.log("room founded")
+                return room
+            }
+        })
+
+
+
+        if (room) {
+            console.log("Joined successfully")
+            room.joinRoom(socket, user)
+
+            io.in(room.name).emit("join", room.users)
+        }
+        else {
+            socket.emit("roomNotExist")
+        }
+
+    }) // End of private room
+
+
 })
 
 
