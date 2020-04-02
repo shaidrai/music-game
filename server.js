@@ -135,15 +135,24 @@ io.on('connection', (socket) => {
 
         })
 
+        // Start private game button at client 
         socket.on('startPrivateGame', () => {
 
+            // Checking if there's more then 1 player to start the game
             if (room.users.length > 1) {
+
+                // Event tell all the clients in the room to go game component
                 io.in(room.name).emit("goToGame")
 
+                // Changing the game mode to the count of players in room
+                room.players = room.users.length
+
+                // Starting the game
                 console.log("starting")
                 Game.startNewGame(room, io)
 
             }
+            // Not 
             else console.log("Not enought players")
         })
 
@@ -189,7 +198,7 @@ io.on('connection', (socket) => {
                     console.log("user left room")
 
                     room.kickUser(socket, user)
-                    console.log(room.users)
+
                     io.in(room.name).emit("left", user)
                 }
                 else {

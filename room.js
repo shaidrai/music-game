@@ -39,7 +39,6 @@ class Room {
         let userI = await this.users.find((user, i) => {
             if (user === userKick)
                 return i
-
         })
 
         let socketI = await this.sockets.find((socket, i) => {
