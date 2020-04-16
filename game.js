@@ -53,9 +53,7 @@ class game {
         responseObjet.note = this.createNote(room.gameLevel)
         responseObjet.winner = winner
         responseObjet.users = room.users // adding users data to the response for the client
-
         this.io.in(room.name).emit('roundwinner', responseObjet)
-
     }
 
     createNote(gameLevel) {
