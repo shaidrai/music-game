@@ -69,12 +69,9 @@ class game {
             note = Math.floor(Math.random() * 12)
         }
         return note
-
-
     }
 
     endGame(room, winner) {
-
         if (!room.gameOver) {
             room.gameOver = true
             this.io.in(room.name).emit('gamewinner', { winner });

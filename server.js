@@ -67,9 +67,12 @@ io.on('connection', (socket) => {
             // if user leave on loading, the room should be deleted 
             if (!room.gameStarted) availbleRoom[user.difficulty] = undefined
 
-            room.disconnectedUsers += 1
-            if (room.disconnectedUsers === room.players - 1) {
-                io.in(room.name).emit("left")
+            if (!room.gameOver) {
+                room.disconnectedUsers += 1
+                if (room.disconnectedUsers === room.players - 1) {
+                    io.in(room.name).emit("left")
+                    room.closeRoom()
+                }
             }
 
         })
@@ -107,16 +110,22 @@ io.on('connection', (socket) => {
 
             // if user leaves before the game started, the room should be deleted 
             if (!room.gameStarted) {
-
+                room.kickUser(socket, user)
+                console.log('admin left')
                 io.in(room.name).emit("roomClosed")
                 PrivateRooms.pop(roomIndex)
 
             }
+            /// Else check if the room is more then 2 players, if it is kick user, else close room
             else {
                 room.disconnectedUsers += 1
                 if (room.disconnectedUsers === room.players - 1) {
                     io.in(room.name).emit("left")
+                    room.closeRoom()
                     PrivateRooms.pop(roomIndex)
+                }
+                else {
+                    room.kickUser(socket, user)
                 }
             }
 
@@ -184,7 +193,7 @@ io.on('connection', (socket) => {
             console.log("Joined successfully")
             room.joinRoom(socket, user)
             io.in(room.name).emit("join", room.users)
-            console.log(room.users)
+
 
             socket.on("answer", (type) => {
                 Game.answer(room, type, user)
@@ -196,15 +205,18 @@ io.on('connection', (socket) => {
 
                 if (!room.gameStarted) {
                     console.log("user left room")
-
                     room.kickUser(socket, user)
-
                     io.in(room.name).emit("left", user)
                 }
                 else {
                     room.disconnectedUsers += 1
                     if (room.disconnectedUsers === room.players - 1) {
                         io.in(room.name).emit("left")
+                        room.closeRoom()
+                        PrivateRooms.pop(roomIndex)
+                    }
+                    else {
+                        room.kickUser(socket, user)
                     }
                 }
 
