@@ -10,7 +10,7 @@ class Room {
         this.gameLevel = gameLevel
         this.answers = 0
         this.gameOver = false
-        this.pointsLimit = 20
+        this.pointsLimit = 100
         this.disconnectedUsers = 0
         this.gameStarted = false
         this.usersAnswered = []
