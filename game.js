@@ -10,6 +10,7 @@ class game {
     startNewGame(room) {
         room.gameStarted = true
         this.io.in(room.name).emit('start', { note: this.createNote(room.gameLevel), users: room.users });
+        this.answerTimer(room, 20000)
     }
 
     answer(room, answerType, user) {
@@ -27,18 +28,18 @@ class game {
 
                 else {
                     // winner id for the client
-                    room.answers = 0
                     this.newRound(room, user.id)
                 }
             }
             else {
                 room.answers += 1
+                room.usersAnswered.push(user)
                 if (user.points > 0) user.points -= 10
 
                 if (room.answers === room.players) {
                     // end of round
                     //room.lockThisRoom()
-                    room.answers = 0
+
                     this.newRound(room)
                 }
                 else {
@@ -49,6 +50,9 @@ class game {
     }
 
     newRound(room, winner) {
+        this.answerTimer(room, 20000)
+        room.answers = 0
+        room.usersAnswered = []
         let responseObjet = {};
         responseObjet.note = this.createNote(room.gameLevel)
         responseObjet.winner = winner
@@ -72,11 +76,26 @@ class game {
     }
 
     endGame(room, winner) {
+        clearTimeout(this.answerTimeout)
         if (!room.gameOver) {
             room.gameOver = true
             this.io.in(room.name).emit('gamewinner', { winner });
             room.closeRoom()
         }
+    }
+
+    // Timer for filling the answers, if one client doesnt response after timeout, server kicks him.
+    answerTimer(room, time) {
+        clearTimeout(this.answerTimeout)
+        this.answerTimeout = setTimeout(() => {
+            room.users.forEach((user, i) => {
+                if (!room.usersAnswered.includes(user)) {
+                    room.sockets[i].disconnect()
+                    room.users.pop(i)
+                    room.sockets.pop(i)
+                }
+            });
+        }, time)
     }
 }
 

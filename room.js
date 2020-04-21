@@ -11,8 +11,11 @@ class Room {
         this.answers = 0
         this.gameOver = false
         this.pointsLimit = 20
-        this.disconnectedUsers = 0,
-            this.gameStarted = false
+        this.disconnectedUsers = 0
+        this.gameStarted = false
+        this.usersAnswered = []
+        // only for private rooms, room index in the global array
+        this.roomIndex = undefined
     }
 
     closeRoom() {
