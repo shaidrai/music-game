@@ -20,7 +20,7 @@
         <div class="container my-auto text-center">
             <h1 class="mb-1"
                 style="background-color: rgb(0,101,145);border-radius: 30px;font-family: Bangers, cursive;color: rgb(255,255,255);">
-                WELCOME TO<br>HEAR 2 LISTEN</h1>
+                REDIRECT TO<br>Do Re Mi</h1>
             <h3 class="mb-5"
                 style="background-color: #a90d58;border-radius: 20px;margin-bottom: 0px;padding-bottom: 8px;padding-top: 8px;color: rgb(255,255,255);">
                 <em style="font-family: Bangers, cursive;">The Best Game For Musicians Ever!</em></h3>
@@ -29,7 +29,7 @@
                 placeholder="Type Your Name..."><a id="play"
                 class="btn btn-primary text-center btn-xl js-scroll-trigger" role="button"
                 style="border-radius: 30PX;font-size: 25px;background-size: auto;background-repeat: no-repeat;background-color: rgb(61,183,81) !important;color: white !important;text-align: center;font-family: Bangers, cursive;">Click
-                Here To Play Online</a>
+                Here To Download The App!</a>
             <div class="overlay"></div>
             <lottie-player src="https://assets7.lottiefiles.com/temp/lf20_SMGMYY.json" background="#ffffffd6" speed="1"
                 style="width: 300px; height: 300px;" loop autoplay>
@@ -119,147 +119,12 @@
 
 <script>
 
-    const socket = io("/api/game3704")
+    window.onload = function () {
 
-    var c = new Audio("./notes/c2.mp3")
-    var cS = new Audio("./notes/cS2.mp3")
-    var d = new Audio("./notes/d2.mp3")
-    var dS = new Audio("./notes/dS2.mp3")
-    var e = new Audio("./notes/e2.mp3")
-    var f = new Audio("./notes/f2.mp3")
-    var fS = new Audio("./notes/fS2.mp3")
-    var g = new Audio("./notes/g2.mp3")
-    var gS = new Audio("./notes/gS2.mp3")
-    var a = new Audio("./notes/a2.mp3")
-    var aS = new Audio("./notes/aS2.mp3")
-    var b = new Audio("./notes/b2.mp3")
-    var SoundList = [{ audio: c, noteName: "c" }, { audio: cS, noteName: "cS" }, { audio: d, noteName: "d" }, { audio: dS, noteName: "dS" }, { audio: e, noteName: "e" }, { audio: f, noteName: "f" }, { audio: fS, noteName: "fS" }, { audio: g, noteName: "g" }, { audio: gS, noteName: "gS" }, { audio: a, noteName: "a" }, { audio: aS, noteName: "aS" }, { audio: b, noteName: "b" }]
-    var indexlist = ["c", 'cS', 'd', 'dS', 'e', 'f', 'fS', 'g', 'gS', 'a', 'aS', 'b']
-    function play(noteNumber) {
+        window.location = "doremi://test" + location.search;
 
-        var a = SoundList[noteNumber].audio
-        a.play()
+        //setTimeout("window.location = 'http://hastrk.com/serve?action=click&publisher_id=1&site_id=2';", 1000);
     }
-
-    $("#play").click(() => {
-        let username = $("#username").val()
-        socket.emit("join", username)
-        $("#home").hide()
-        $("#loading").fadeIn()
-
-
-        // send request and connect to socket
-    })
-    var savedNote = undefined
-
-    socket.on("users", (users) => {
-        $("#userone").html(users[0])
-        $("#usertwo").html(users[1])
-    })
-
-    socket.on("start", (note) => {
-        starting(note)
-        savedNote = note
-    })
-
-    socket.on("roundwinner", (winner) => {
-        $("#winnername").html(winner.winner + '<br> WON THE ROUND!')
-        $("#useronestats").html(winner.user1)
-        $("#usertwostats").html(winner.user2)
-        $("#winner").slideDown(100)
-
-        setTimeout(() => {
-            $("#winner").slideUp(150)
-        }, 2000)
-
-
-    })
-
-
-    socket.on("roundstart", (note) => {
-        $("#full-keyboard").slideUp()
-        roundStart(note)
-        savedNote = note
-    })
-
-    socket.on("nowinner", (points) => {
-        $("#useronestats").html(points.user1)
-        $("#usertwostats").html(points.user2)
-        $("#winnername").html('NO ONE WON THE ROUND <br> YOU LOOSERS!')
-
-        $("#winner").slideDown(100)
-        setTimeout(() => {
-            $("#winner").slideUp(100)
-        }, 1500)
-
-    })
-
-    let countdown = '<lottie-player\
-    src="https://assets5.lottiefiles.com/temp/lf20_ZJFHXo.json"  background="transparent"  speed="1"  style="width: 250px; height: 250px;" autoplay >\
-</lottie-player>'
-
-
-
-
-    function starting(note) {
-        $("#loading").hide()
-        $("#game").show()
-        roundStart(note)
-    }
-
-    function roundStart(note) {
-        $("#countdown").html('')
-        $("#countdown").html(countdown)
-        console.log("new round")
-        setTimeout(() => {
-            play(note)
-            $("#full-keyboard").slideDown()
-
-            setTimeout(() => {
-
-                $("#playagain").slideDown()
-
-            }, 1000)
-        }, 3300)
-
-
-
-        $("#playagain").click(() => {
-            play(note)
-            $("#playagain").slideUp()
-        })
-
-    }
-
-    $(".note").click((noteDiv) => {
-
-        let noteClicked = noteDiv.toElement.getAttribute("id")
-
-        play(indexlist.indexOf(noteClicked))
-
-
-
-        if (noteClicked === SoundList[savedNote].noteName) {
-            // emit correction 
-
-            socket.emit('answer', 'correct')
-        }
-        else socket.emit('answer', 'wrong')
-
-        setTimeout(() => {
-            $("#full-keyboard").slideUp()
-        }, 100)
-
-
-    })
-
-
-
-
-    // error
-
-
-
 
 </script>
 
