@@ -36,7 +36,6 @@ function SocketHandler(io) {
 
             }
 
-
             socket.on("answer", (type) => {
                 Game.answer(room, type, user)
 

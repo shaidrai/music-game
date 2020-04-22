@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 
     if (req.query.roomName) {
         console.log(req.query.roomName)
-        res.redirect("doremi://?roomName=" + req.query.roomName)
+        res.redirect("doremi://test?roomName=" + req.query.roomName)
     }
     else {
         res.send("index")
