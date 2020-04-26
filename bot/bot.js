@@ -22,15 +22,15 @@ class Bot {
         this.botLevel = this.getBotLevel(this.rank)
         botData.name = this.botLevel
     }
-
+    ç
     mannager() {
         this.socket.on("start", () => {
             this.socket.removeEventListener('start')
-            this.answer(8000)
+            this.answer(6900)
 
             this.socket.on("roundwinner", () => {
                 this.clearTimeOuts()
-                this.answer(8000)
+                this.answer(7000)
             });
 
             this.socket.on("gamewinner", () => {
