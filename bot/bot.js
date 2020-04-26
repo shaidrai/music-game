@@ -16,13 +16,19 @@ class Bot {
 
     createBot() {
         botData.difficulty = this.difficulty
-        botData.rank = this.rank + botConff.rank[Math.floor(Math.random() * (botConff.rank.length))]
         botData.profilePictureIndex = Math.floor(Math.random() * (9))
         botData.name = botConff.names[Math.floor(Math.random() * (botConff.names.length))]
         this.botLevel = this.getBotLevel(this.rank)
         botData.name = this.botLevel
+
+
+        let min = botConff.rank[this.botLevel].min
+        let max = botConff.rank[this.botLevel].max
+        let delta = max - min
+        botData.rank = Math.floor(Math.random() * delta) + min
+
     }
-    ç
+
     mannager() {
         this.socket.on("start", () => {
             this.socket.removeEventListener('start')
@@ -30,7 +36,7 @@ class Bot {
 
             this.socket.on("roundwinner", () => {
                 this.clearTimeOuts()
-                this.answer(7000)
+                this.answer(6800)
             });
 
             this.socket.on("gamewinner", () => {
@@ -47,10 +53,18 @@ class Bot {
 
 
     answer(timeout) {
-        this.timeouts.push(setTimeout(() => {
-            this.socket.emit("answer", botConff.level[this.botLevel].rightAnswer[Math.floor(Math.random() * (botConff.level[this.botLevel].rightAnswer.length))])
+        let delay = botConff.level[this.botLevel].timeOutsAfterPlaying[Math.floor(Math.random() * (botConff.level[this.botLevel].timeOutsAfterPlaying.length))]
+        let min = botConff.reactionTimes[delay].min
+        let max = botConff.reactionTimes[delay].max
+        let delta = max - min
+        let answer = botConff.level[this.botLevel].rightAnswer[Math.floor(Math.random() * (botConff.level[this.botLevel].rightAnswer.length))]
 
-        }, timeout + botConff.level[this.botLevel].timeOutsAfterPlaying[Math.floor(Math.random() * (botConff.level[this.botLevel].timeOutsAfterPlaying.length))]))
+        delay = Math.floor(Math.random() * delta) + min
+
+        this.timeouts.push(setTimeout(() => {
+            this.socket.emit("answer", answer)
+
+        }, timeout + delay))
     }
 
     clearTimeOuts() {
@@ -64,21 +78,20 @@ class Bot {
     }
 
     useBotOnTimeout(room) {
-        setTimeout(() => {
+        this.startingTimeout = setTimeout(() => {
             if (!room.gameStarted) this.initialize()
         }, botConff.startBotTimeOut[Math.floor(Math.random() * (botConff.startBotTimeOut.length))])
     }
 
     getBotLevel(rank) {
-        let randomLevels = undefined;
-        if (rank > 1200) randomLevels = ['best', 'best', 'ok', 'good', 'good', 'best', 'good']
-        else if (rank > 1000) randomLevels = ['best', 'good', 'good', 'good', 'ok', 'bad', 'best', 'ok']
-        else if (rank <= 800) randomLevels = ['worst', 'bad', 'ok', 'ok', 'bad', 'good']
-        else randomLevels = ['best'] //['ok', 'ok', 'ok', 'bad', 'good', 'best']
-        return randomLevels[Math.floor(Math.random() * (randomLevels.length))]
+        for (let i = 0; i < botConff.rankLevels.length; i++) {
+            if (rank > botConff.rankLevels[i].rank) {
+                let chances = botConff.rankLevels[i].chances
+                return chances[Math.floor(Math.random() * (chances.length))]
 
+            }
+        }
     }
-
 }
 
 
@@ -96,5 +109,9 @@ const botData = {
     profilePictureIndex: 0,
     difficulty: 0
 }
+
+
+
+
 
 module.exports = Bot

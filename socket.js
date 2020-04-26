@@ -6,7 +6,6 @@ const Bot = require('./bot/bot')
 
 function SocketHandler(io) {
 
-
     let availbleRoom = [undefined, undefined, undefined] // Level one, two and three.
     let PrivateRooms = []
     let Game = new game(io)
@@ -36,6 +35,7 @@ function SocketHandler(io) {
                 room.joinRoom(socket, user)
                 const bot = new Bot(user.difficulty, user.rank)
                 bot.useBotOnTimeout(room)
+                room.bot = bot
 
             }
 
@@ -48,7 +48,13 @@ function SocketHandler(io) {
             socket.on("disconnect", () => {
                 console.log("dissconnect")
                 // if user leave on loading, the room should be deleted 
-                if (!room.gameStarted) availbleRoom[user.difficulty] = undefined
+                if (!room.gameStarted) {
+                    availbleRoom[user.difficulty] = undefined
+                    if (room.bot) {
+                        console.log("cleared")
+                        clearTimeout(room.bot.startingTimeout)
+                    }
+                }
 
                 else if (!room.gameOver) {
 

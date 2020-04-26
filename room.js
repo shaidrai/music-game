@@ -16,6 +16,7 @@ class Room {
         this.usersAnswered = []
         // only for private rooms, room index in the global array
         this.roomIndex = undefined
+        this.bot = undefined
     }
 
     closeRoom() {

@@ -1,17 +1,46 @@
+const precentToChance = require('./utills')
+
 const conf =
 {
     endpoint: "https://music-game-server.herokuapp.com",
     //endpoint: 'http://10.0.0.26:5000',
-    rightAnswer: ['correct', 'correct', 'wrong'],
     level: {
-        ok: { timeOutsAfterPlaying: [500, 500, 1000, 1300, 2000, 3000, 700, 3700, 2400], rightAnswer: ['correct', 'correct', 'wrong'] },
-        good: { timeOutsAfterPlaying: [500, 500, 300, 100, 400, 600, 1000, 200, 100], rightAnswer: ['correct', 'correct', 'correct', 'wrong'] },
-        bad: { timeOutsAfterPlaying: [2000, 2000, 1500, 1300, 2000, 3000, 5000, 3700, 2400], rightAnswer: ['correct', 'correct', 'correct', 'wrong', 'wrong'] },
-        best: { timeOutsAfterPlaying: [100, 200, 300, 100, 200, 100, 300, 200, 100], rightAnswer: ['correct', 'correct', 'correct', 'correct', 'wrong'] },
+        best: { timeOutsAfterPlaying: precentToChance({ veryFast: 60, fast: 30, ok: 10 }), rightAnswer: precentToChance({ correct: 80, wrong: 20 }) },
+        good: { timeOutsAfterPlaying: precentToChance({ veryFast: 20, fast: 40, ok: 30, slow: 10 }), rightAnswer: precentToChance({ correct: 70, wrong: 30 }) },
+        ok: { timeOutsAfterPlaying: precentToChance({ fast: 20, ok: 60, slow: 20 }), rightAnswer: precentToChance({ correct: 60, wrong: 40 }) },
+        bad: { timeOutsAfterPlaying: precentToChance({ fast: 10, ok: 50, slow: 40 }), rightAnswer: precentToChance({ correct: 40, wrong: 60 }) },
     },
-    rank: [123, 254, -122, -357, 576, 53, 28, 15, -17, -19, 0, 0, 340],
+
     startBotTimeOut: [4700, 3200, 5000, 4500, 3700],
-    names: ["musicwizard112", "musicking", 'jonnyrogen', 'zzz', 'shaidrai', 'hodiel', 'kaki', 'poopy55', 'bach', 'jackyr', 'david', 'ninini', 'americanmozart', 'adirh', 'maorcohenn', 'ofirhillel']
+
+    names: ["musicwizard112", "musicking", 'jonnyrogen', 'zzz', 'shaidrai', 'hodiel', 'kaki', 'poopy55', 'bach', 'jackyr', 'david', 'ninini', 'americanmozart', 'adirben', 'maorcohenn', 'ofirhillel'],
+
+    // What is the chance to fall on every bot level according to your rank
+    rankLevels: [
+        // above rank: level chances in precent
+        { rank: 1200, chances: precentToChance({ ok: 20, good: 30, best: 50 }) },
+        { rank: 1000, chances: precentToChance({ bad: 10, ok: 30, good: 40, best: 20 }) },
+        { rank: 900, chances: precentToChance({ bad: 30, ok: 40, good: 20, best: 10 }) },
+        { rank: -1, chances: precentToChance({ bad: 30, ok: 40, good: 30 }) }
+    ],
+
+
+    reactionTimes: {
+        // min and max answer delay in milliseconds
+        veryFast: { min: 200, max: 500 },
+        fast: { min: 500, max: 1000 },
+        ok: { min: 1000, max: 2000 },
+        slow: { min: 2000, max: 4000 },
+    },
+
+    // bot rank 
+    rank: {
+        best: { min: 1800, max: 5000 },
+        good: { min: 1300, max: 1800 },
+        ok: { min: 1001, max: 1300 },
+        bad: { min: 500, max: 1001 },
+    }
+
 }
 
 module.exports = conf
