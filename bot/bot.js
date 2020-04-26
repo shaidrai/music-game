@@ -6,7 +6,7 @@ class Bot {
     constructor(difficulty, rank) {
         this.rank = rank
         this.difficulty = difficulty
-        this.socket = io.connect("https://music-game-server.herokuapp.com")
+        this.socket = io.connect(botConff.endpoint)
         this.timeouts = []
     }
 
@@ -20,6 +20,7 @@ class Bot {
         botData.profilePictureIndex = Math.floor(Math.random() * (9))
         botData.name = botConff.names[Math.floor(Math.random() * (botConff.names.length))]
         this.botLevel = this.getBotLevel(this.rank)
+        botData.name = this.botLevel
     }
 
     mannager() {
@@ -47,9 +48,9 @@ class Bot {
 
     answer(timeout) {
         this.timeouts.push(setTimeout(() => {
-            this.socket.emit("answer", botConff[this.botLevel].rightAnswer[Math.floor(Math.random() * (botConff[this.botLevel].rightAnswer.length))])
+            this.socket.emit("answer", botConff.level[this.botLevel].rightAnswer[Math.floor(Math.random() * (botConff.level[this.botLevel].rightAnswer.length))])
 
-        }, timeout + botConff[this.botLevel].timeOutsAfterPlaying[Math.floor(Math.random() * (botConff[this.botLevel].timeOutsAfterPlaying.length))]))
+        }, timeout + botConff.level[this.botLevel].timeOutsAfterPlaying[Math.floor(Math.random() * (botConff.level[this.botLevel].timeOutsAfterPlaying.length))]))
     }
 
     clearTimeOuts() {

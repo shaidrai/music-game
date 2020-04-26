@@ -1,5 +1,7 @@
 const conf =
 {
+    //"https://music-game-server.herokuapp.com"
+    endpoint: 'http://10.0.0.26:5000',
     rightAnswer: ['correct', 'correct', 'wrong'],
     level: {
         ok: { timeOutsAfterPlaying: [500, 500, 1000, 1300, 2000, 3000, 700, 3700, 2400], rightAnswer: ['correct', 'correct', 'wrong'] },

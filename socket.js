@@ -40,7 +40,7 @@ function SocketHandler(io) {
             }
 
             socket.on("answer", (type) => {
-                console.log("emit")
+
                 Game.answer(room, type, user)
 
             })
