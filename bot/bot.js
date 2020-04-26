@@ -15,9 +15,11 @@ class Bot {
     }
 
     createBot() {
-        botData.rank = this.rank + botConff.rank[Math.floor(Math.random() * (botConff.rank.length - 1))]
+        botData.difficulty = this.difficulty
+        botData.rank = this.rank + botConff.rank[Math.floor(Math.random() * (botConff.rank.length))]
         botData.profilePictureIndex = Math.floor(Math.random() * (9))
-        botData.name = botConff.names[Math.floor(Math.random() * (botConff.names.length - 1))]
+        botData.name = botConff.names[Math.floor(Math.random() * (botConff.names.length))]
+        this.botLevel = this.getBotLevel(this.rank)
     }
 
     mannager() {
@@ -45,9 +47,9 @@ class Bot {
 
     answer(timeout) {
         this.timeouts.push(setTimeout(() => {
-            this.socket.emit("answer", botConff.rightAnswer[Math.floor(Math.random() * (botConff.rightAnswer.length - 1))])
+            this.socket.emit("answer", botConff[this.botLevel].rightAnswer[Math.floor(Math.random() * (botConff[this.botLevel].rightAnswer.length))])
 
-        }, timeout + botConff.timeOutsAfterPlaying[Math.floor(Math.random() * (botConff.timeOutsAfterPlaying.length - 1))]))
+        }, timeout + botConff[this.botLevel].timeOutsAfterPlaying[Math.floor(Math.random() * (botConff[this.botLevel].timeOutsAfterPlaying.length))]))
     }
 
     clearTimeOuts() {
@@ -63,7 +65,17 @@ class Bot {
     useBotOnTimeout(room) {
         setTimeout(() => {
             if (!room.gameStarted) this.initialize()
-        }, botConff.startBotTimeOut[Math.floor(Math.random() * (botConff.rank.length - 1))])
+        }, botConff.startBotTimeOut[Math.floor(Math.random() * (botConff.startBotTimeOut.length))])
+    }
+
+    getBotLevel(rank) {
+        let randomLevels = undefined;
+        if (rank > 1200) randomLevels = ['best', 'best', 'ok', 'good', 'good', 'best', 'good']
+        else if (rank > 1000) randomLevels = ['best', 'good', 'good', 'good', 'ok', 'bad', 'best', 'ok']
+        else if (rank <= 800) randomLevels = ['worst', 'bad', 'ok', 'ok', 'bad', 'good']
+        else randomLevels = ['best'] //['ok', 'ok', 'ok', 'bad', 'good', 'best']
+        return randomLevels[Math.floor(Math.random() * (randomLevels.length))]
+
     }
 
 }
