@@ -2,6 +2,7 @@
 const uniqid = require('uniqid');
 const Room = require('./room')
 const game = require('./game')
+const Bot = require('./bot/bot')
 
 function SocketHandler(io) {
 
@@ -33,10 +34,13 @@ function SocketHandler(io) {
                 room = new Room(user.difficulty)
                 availbleRoom[user.difficulty] = room
                 room.joinRoom(socket, user)
+                const bot = new Bot(user.difficulty, user.rank)
+                bot.useBotOnTimeout(room)
 
             }
 
             socket.on("answer", (type) => {
+                console.log("emit")
                 Game.answer(room, type, user)
 
             })
