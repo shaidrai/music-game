@@ -17,9 +17,9 @@ class Bot {
     createBot() {
         botData.difficulty = this.difficulty
         botData.profilePictureIndex = Math.floor(Math.random() * (9))
-        botData.name = botConff.names[Math.floor(Math.random() * (botConff.names.length))]
+        botData.name = (botConff.names[Math.floor(Math.random() * (botConff.names.length))]).toUpperCase()
         this.botLevel = this.getBotLevel(this.rank)
-        botData.name = this.botLevel
+
 
 
         let min = botConff.rank[this.botLevel].min
