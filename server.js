@@ -6,6 +6,9 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const staticDir = path.join(__dirname, "public");
 const SocketHandler = require("./socket");
+const userRouter = require("./src/routers/user")
+const dotenv = require("dotenv");
+dotenv.config()
 require("./src/db/connect");
 
 const app = express();
@@ -19,6 +22,8 @@ app.use(
 	})
 );
 
+app.use(userRouter)
+
 const server = http.createServer(app);
 const io = socketio(server);
 const port = process.env.PORT || 5000;
@@ -27,6 +32,9 @@ SocketHandler(io);
 app.get("/", (req, res) => {
 	res.send("index", { roomName: req.query.roomName });
 });
+
+
+
 server.listen(port, () => {
 	console.log("Server is up");
 });

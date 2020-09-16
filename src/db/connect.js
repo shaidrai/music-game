@@ -1,9 +1,8 @@
 const mongoose = require("mongoose"); //require modules
 // const env = require("dotenv").config();
-console.log("here");
 mongoose
 	.connect(
-		"mongodb+srv://shai8989169:@cluster0.mx9fs.mongodb.net/doremi?retryWrites=true&w=majority",
+		"mongodb+srv://shai:shaidrai@cluster0.mx9fs.mongodb.net/doReMi?retryWrites=true&w=majority",
 		{
 			useNewUrlParser: true,
 			useCreateIndex: true,
@@ -11,5 +10,5 @@ mongoose
 			useUnifiedTopology: true,
 		}
 	)
-	.then(() => console.log("connected"))
+	.then(() => console.log("DB Connected"))
 	.catch((err) => console.log(err));

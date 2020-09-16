@@ -2,7 +2,6 @@ const uniqid = require("uniqid");
 const Room = require("./src/classes/room");
 const game = require("./src/classes/game");
 const Bot = require("./src/bot/bot");
-const io = require("socket.io");
 
 function SocketHandler(io) {
 	let availbleRoom = [undefined, undefined, undefined]; // Level one, two and three.
