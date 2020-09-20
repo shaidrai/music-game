@@ -10,6 +10,7 @@ const userRouter = require("./src/routers/user")
 const dotenv = require("dotenv");
 dotenv.config()
 require("./src/db/connect");
+const SocketHandler2 = require("./src/classes/gameListeners");
 
 const app = express();
 app.use(express.static(staticDir));
@@ -27,7 +28,9 @@ app.use(userRouter)
 const server = http.createServer(app);
 const io = socketio(server);
 const port = process.env.PORT || 5000;
-SocketHandler(io);
+//SocketHandler(io);
+
+new SocketHandler2(io)
 
 app.get("/", (req, res) => {
 	res.send("index", { roomName: req.query.roomName });
