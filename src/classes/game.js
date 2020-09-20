@@ -1,3 +1,5 @@
+const UserData = require('./updateUsers')
+
 class game {
 	constructor(io) {
 		this.io = io;
