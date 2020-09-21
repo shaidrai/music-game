@@ -55,7 +55,6 @@ class GameListeres {
   }
 
   listeners() {
-    console.log("here");
     this.io.on("connection", (socket) => {
       socket.on("join", (user) => {
         console.log("Join: ", user);
