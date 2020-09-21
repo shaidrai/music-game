@@ -1,61 +1,57 @@
-const uniqid = require('uniqid');
+const uniqid = require("uniqid");
+const gameConfig = require("../configurations/game");
 
 class Room {
-    constructor(gameLevel = 0) {
-        this.users = []
-        this.sockets = [];
-        this.lockRoom = false;
-        this.name = uniqid()
-        this.players = 2
-        this.gameLevel = gameLevel
-        this.answers = 0
-        this.gameOver = false
-        this.pointsLimit = 100
-        this.disconnectedUsers = 0
-        this.gameStarted = false
-        this.usersAnswered = []
-        // only for private rooms, room index in the global array
-        this.roomIndex = undefined
-        this.bot = undefined
-    }
+  constructor(gameLevel = 0) {
+    this.users = [];
+    this.sockets = [];
+    this.lockRoom = false;
+    this.name = uniqid();
+    this.players = 2;
+    this.gameLevel = gameLevel;
+    this.answers = 0;
+    this.gameOver = false;
+    this.pointsLimit = gameConfig.roundPointsLimit;
+    this.disconnectedUsers = 0;
+    this.gameStarted = false;
+    this.usersAnswered = [];
+    // only for private rooms, room index in the global array
+    this.roomIndex = undefined;
+    this.bot = undefined;
+  }
 
-    closeRoom() {
-        this.sockets.forEach((socket) => {
-            socket.disconnect()
-        })
-    }
+  closeRoom() {
+    this.sockets.forEach((socket) => {
+      socket.disconnect();
+    });
+  }
 
-    lockThisRoom() {
-        this.lockRoom = true
-        setTimeout(() => {
-            this.lockRoom = false
-        }, 2500)
-    }
+  lockThisRoom() {
+    this.lockRoom = true;
+    setTimeout(() => {
+      this.lockRoom = false;
+    }, 2500);
+  }
 
-    joinRoom(socket, user) {
-        // Join the room
-        this.users.push(user)
-        this.sockets.push(socket)
-        socket.join(this.name)
-    }
+  joinRoom(socket, user) {
+    // Join the room
+    this.users.push(user);
+    this.sockets.push(socket);
+    socket.join(this.name);
+  }
 
-    async kickUser(socketKick, userKick) {
-        let userI = await this.users.find((user, i) => {
-            if (user === userKick)
-                return i
-        })
+  async kickUser(socketKick, userKick) {
+    let userI = await this.users.find((user, i) => {
+      if (user === userKick) return i;
+    });
 
-        let socketI = await this.sockets.find((socket, i) => {
-            if (socket === socketKick)
-                return i
+    let socketI = await this.sockets.find((socket, i) => {
+      if (socket === socketKick) return i;
+    });
 
-        })
-
-        this.users.pop(userI)
-        this.sockets.pop(socketI)
-
-    }
-
+    this.users.pop(userI);
+    this.sockets.pop(socketI);
+  }
 }
 
-module.exports = Room
+module.exports = Room;
